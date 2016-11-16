@@ -7,6 +7,7 @@ insert into masterdata.specializations (name)
   where
     ic.specialisation is not null and ic.specialisation not like '';
 
+
 insert into masterdata.candidates (name, current_term, specializations_id)
   select
     ic.name,
@@ -113,13 +114,142 @@ insert into masterdata.criterias (name)
     table_name = 'rating_by_companies' and
     column_name like 'crit_%';
 
-select
-    *--mcan.id,
---     mcom.id,
---     false
-  from
-    import.rating_by_candidates irbc
-  inner join masterdata.candidates mcan on
-    irbc.candidate = mcan.name
-  inner join masterdata.companies mcom on
-    irbc.company = mcom.name
+--loop and get ratings
+do
+$$
+declare
+
+  var_row     record;
+  var_rating_row  record;
+  var_rating_id int;
+
+begin
+
+  /*create temp table tmp_rating_with_criterias(
+    ratings_id   int,
+    criterias_id  int,
+    rating_value  int
+    );
+*/
+  for var_rating_row in
+    select
+      *
+    from
+      import.rating_by_candidates
+  loop
+
+    insert into masterdata.ratings (candidates_id, companies_id, direction_flag)
+      select
+        mcan.id,
+        mcom.id,
+        false
+      from
+        masterdata.candidates mcan
+      inner join masterdata.companies mcom on
+        mcan.name = var_rating_row.candidate and
+        mcom.name = var_rating_row.company
+    returning id into var_rating_id;
+
+    for var_row in
+      select
+        column_name--substring(column_name from position('_' in column_name)+1)
+      from
+        information_schema.columns
+      where
+        table_schema = 'import' and
+        table_name = 'rating_by_candidates' and
+        column_name like 'crit_%'
+    loop
+
+    execute('insert into masterdata.criterias_in_ratings (ratings_id, criterias_id, rating_value)
+
+      select
+        ' || var_rating_id || ',
+        mcr.id,
+        irbc.' || var_row.column_name || '::int
+      from
+        import.rating_by_candidates irbc
+      inner join information_schema.columns isc on
+        isc.table_schema = ''import'' and
+        isc.table_name = ''rating_by_candidates'' and
+        isc.column_name like ''crit_%''
+      inner join masterdata.criterias mcr on
+        mcr.name = substring(''' || var_row.column_name || ''' from position(''_'' in ''' || var_row.column_name || ''')+1)
+      where
+        isc.column_name = ''' || var_row.column_name || ''' and
+        irbc.id = ' || var_rating_row.id || '');
+
+    end loop;
+
+  end loop;
+
+end
+$$
+;
+
+do
+$$
+declare
+
+  var_row     record;
+  var_rating_row  record;
+  var_rating_id int;
+
+begin
+
+
+  for var_rating_row in
+    select
+      *
+    from
+      import.rating_by_companies
+  loop
+
+    insert into masterdata.ratings (candidates_id, companies_id, direction_flag)
+      select
+        mcan.id,
+        mcom.id,
+        true
+      from
+        masterdata.candidates mcan
+      inner join masterdata.companies mcom on
+        mcan.name = var_rating_row.candidate and
+        mcom.name = var_rating_row.company
+    returning id into var_rating_id;
+
+    for var_row in
+      select
+        column_name--substring(column_name from position('_' in column_name)+1)
+      from
+        information_schema.columns
+      where
+        table_schema = 'import' and
+        table_name = 'rating_by_companies' and
+        column_name like 'crit_%'
+    loop
+
+    execute('insert into masterdata.criterias_in_ratings (ratings_id, criterias_id, rating_value)
+
+      select
+        ' || var_rating_id || ',
+        mcr.id,
+        irbc.' || var_row.column_name || '::int
+      from
+        import.rating_by_companies irbc
+      inner join information_schema.columns isc on
+        isc.table_schema = ''import'' and
+        isc.table_name = ''rating_by_companies'' and
+        isc.column_name like ''crit_%''
+      inner join masterdata.criterias mcr on
+        mcr.name = substring(''' || var_row.column_name || ''' from position(''_'' in ''' || var_row.column_name || ''')+1)
+      where
+        isc.column_name = ''' || var_row.column_name || ''' and
+        irbc.id = ' || var_rating_row.id || '');
+
+    end loop;
+
+  end loop;
+
+end
+$$
+;

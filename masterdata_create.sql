@@ -51,7 +51,7 @@ create table masterdata.ratings (
   id          serial primary key,
   candidates_id int,
   companies_id  int,
-  created       bigint,
+  created       bigint default date_part('epoch'::text, timezone('UTC-2'::text, now())),
   direction_flag  bool, --true = companies about candidates, false = candidates about companies. will provide views for that
   foreign key (candidates_id) references masterdata.candidates (id),
   foreign key (companies_id) references masterdata.companies (id)
@@ -69,7 +69,7 @@ create table masterdata.criterias_in_ratings (
 create view masterdata.v_ratings_about_companies as
   select
     r.id,
-    to_timestamp(r.created) as rated_at,
+    to_timestamp(r.created) at time zone 'UTC-2' as rated_at,
     co.name as company_name,
     ca.name as student_name,
     c.name as criteria_name,
@@ -89,7 +89,7 @@ create view masterdata.v_ratings_about_companies as
 create view masterdata.v_ratings_about_candidates as
   select
     r.id,
-    to_timestamp(r.created) as rated_at,
+    to_timestamp(r.created) at time zone 'UTC-2' as rated_at,
     co.name as company_name,
     ca.name as student_name,
     c.name as criteria_name,
