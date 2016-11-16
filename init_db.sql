@@ -1,6 +1,6 @@
 create database mission5;
-create schema masterdata;
-create schema import;
+create schema if not exists masterdata;
+create schema if not exists import;
 --create table masterdata.test ( id serial primary key);
 
 -- DDL for the RDB
