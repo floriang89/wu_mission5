@@ -2,7 +2,7 @@
 
 create table import.companies
 (
-    id integer primary key not null,
+    id serial primary key not null,
     comapany_name text,
     industry text,
     employees text
@@ -10,7 +10,7 @@ create table import.companies
 
 create table import.candidates
 (
-    id integer primary key not null,
+    id serial primary key not null,
     name text,
     current_term text,
     grade_accounting text,
@@ -23,7 +23,7 @@ create table import.candidates
 
 create table import.rating_by_candidates
 (
-    id integer primary key not null,
+    id serial primary key not null,
     company text,
     candidate text,
     crit_interesting_activity text,
@@ -32,7 +32,7 @@ create table import.rating_by_candidates
 
 create table import.rating_by_companies
 (
-    id integer primary key not null,
+    id serial primary key not null,
     company text,
     candidate text,
     crit_knowledge text,
