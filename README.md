@@ -6,8 +6,8 @@
 
 ##Setup:
 1. git clone this repository to your local machine
-2. build an image with docker with the following command (make sure, you are in the postgres-directory): `docker build -t mission5-db:v1 . `
-3. start a container with the following command: `docker run -p 35000:5432 mission5-db:v1`
+2. build an image, based on the Dockerfile with the following command (make sure, you are in the postgres-directory. this could take a while): `docker build -t mission5-db:v1 . `
+3. start a container with the following command (if you like, you can choose a different port than 35000): `docker run -p 35000:5432 mission5-db:v1`
 4. access the container with an IDE of your choice (I strongly recommend DataGrip) with the following credentials: IP/Address 127.0.0.1 Port 35000 Database mission5 User h0927586 Password h0927586
 
 ##What do the scripts do? What is the sequence the scripts are runned?

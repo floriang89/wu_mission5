@@ -3,7 +3,7 @@ MAINTAINER Flo Gu florian.gugganeder@gmail.com
 
 COPY src/* /src/
 
-RUN apt-get update && apt-get install -y python-software-properties software-properties-common postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4 
+RUN apt-get update && apt-get install -y python-software-properties software-properties-common postgresql-9.4 postgresql-client-9.4 postgresql-contrib-9.4 --force-yes
 
 USER postgres
 
